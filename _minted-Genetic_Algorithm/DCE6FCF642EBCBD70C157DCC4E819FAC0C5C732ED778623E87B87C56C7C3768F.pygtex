@@ -1,0 +1,426 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+	\PYG{k+kn}{import} \PYG{n+nn}{random}
+	\PYG{k+kn}{import} \PYG{n+nn}{numpy} \PYG{k}{as} \PYG{n+nn}{np}
+	\PYG{k+kn}{from} \PYG{n+nn}{prettytable} \PYG{k+kn}{import} \PYG{n}{PrettyTable}
+	\PYG{k+kn}{from} \PYG{n+nn}{torch.utils.tensorboard} \PYG{k+kn}{import} \PYG{n}{SummaryWriter}  \PYG{c+c1}{\PYGZsh{} 引入TensorBoard}
+	
+	\PYG{c+c1}{\PYGZsh{} 输入数据}
+	\PYG{n}{classrooms} \PYG{o}{=} \PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}2101\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}2102\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}2103\PYGZdq{}}\PYG{p}{]}
+	\PYG{n}{classes} \PYG{o}{=} \PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}1班\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}2班\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}3班\PYGZdq{}}\PYG{p}{]}
+	\PYG{n}{courses} \PYG{o}{=} \PYG{p}{\PYGZob{}}
+	    \PYG{l+s+s2}{\PYGZdq{}52005\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}高等数学\PYGZdq{}}\PYG{p}{,}
+	    \PYG{l+s+s2}{\PYGZdq{}53202\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}线性代数\PYGZdq{}}\PYG{p}{,}
+	    \PYG{l+s+s2}{\PYGZdq{}53215\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}概率统计\PYGZdq{}}\PYG{p}{,}
+	    \PYG{l+s+s2}{\PYGZdq{}53230\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}运筹学\PYGZdq{}}\PYG{p}{,}
+	    \PYG{l+s+s2}{\PYGZdq{}54007\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}计算机应用基础\PYGZdq{}}\PYG{p}{,}
+	    \PYG{l+s+s2}{\PYGZdq{}54200\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}微机原理与接口技术\PYGZdq{}}\PYG{p}{,}
+	    \PYG{l+s+s2}{\PYGZdq{}54459\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}数据结构\PYGZdq{}}\PYG{p}{,}
+	    \PYG{l+s+s2}{\PYGZdq{}54569\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}数字图像处理\PYGZdq{}}\PYG{p}{,}
+	    \PYG{l+s+s2}{\PYGZdq{}54830\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}人工智能基础\PYGZdq{}}\PYG{p}{,}
+	    \PYG{l+s+s2}{\PYGZdq{}54976\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}嵌入式智能系统\PYGZdq{}}
+	\PYG{p}{\PYGZcb{}}
+	\PYG{n}{teachers} \PYG{o}{=} \PYG{p}{\PYGZob{}}
+	    \PYG{l+s+s2}{\PYGZdq{}T1\PYGZdq{}}\PYG{p}{:} \PYG{p}{\PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}name\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}冯桥\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}courses\PYGZdq{}}\PYG{p}{:} \PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}52005\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}53202\PYGZdq{}}\PYG{p}{]\PYGZcb{},}
+	    \PYG{l+s+s2}{\PYGZdq{}T2\PYGZdq{}}\PYG{p}{:} \PYG{p}{\PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}name\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}赵思\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}courses\PYGZdq{}}\PYG{p}{:} \PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}53215\PYGZdq{}}\PYG{p}{]\PYGZcb{},}
+	    \PYG{l+s+s2}{\PYGZdq{}T3\PYGZdq{}}\PYG{p}{:} \PYG{p}{\PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}name\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}赵宏生\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}courses\PYGZdq{}}\PYG{p}{:} \PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}54007\PYGZdq{}}\PYG{p}{]\PYGZcb{},}
+	    \PYG{l+s+s2}{\PYGZdq{}T4\PYGZdq{}}\PYG{p}{:} \PYG{p}{\PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}name\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}赵国\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}courses\PYGZdq{}}\PYG{p}{:} \PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}54007\PYGZdq{}}\PYG{p}{]\PYGZcb{},}
+	    \PYG{l+s+s2}{\PYGZdq{}T5\PYGZdq{}}\PYG{p}{:} \PYG{p}{\PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}name\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}董南振\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}courses\PYGZdq{}}\PYG{p}{:} \PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}53230\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}54200\PYGZdq{}}\PYG{p}{]\PYGZcb{},}
+	    \PYG{l+s+s2}{\PYGZdq{}T6\PYGZdq{}}\PYG{p}{:} \PYG{p}{\PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}name\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}祝毅勇\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}courses\PYGZdq{}}\PYG{p}{:} \PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}53230\PYGZdq{}}\PYG{p}{]\PYGZcb{},}
+	    \PYG{l+s+s2}{\PYGZdq{}T7\PYGZdq{}}\PYG{p}{:} \PYG{p}{\PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}name\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}李兴\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}courses\PYGZdq{}}\PYG{p}{:} \PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}54459\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}54569\PYGZdq{}}\PYG{p}{]\PYGZcb{},}
+	    \PYG{l+s+s2}{\PYGZdq{}T8\PYGZdq{}}\PYG{p}{:} \PYG{p}{\PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}name\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}赵荣正\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}courses\PYGZdq{}}\PYG{p}{:} \PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}54830\PYGZdq{}}\PYG{p}{]\PYGZcb{},}
+	    \PYG{l+s+s2}{\PYGZdq{}T9\PYGZdq{}}\PYG{p}{:} \PYG{p}{\PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}name\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}王磊宏\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}courses\PYGZdq{}}\PYG{p}{:} \PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}54976\PYGZdq{}}\PYG{p}{]\PYGZcb{},}
+	    \PYG{l+s+s2}{\PYGZdq{}T10\PYGZdq{}}\PYG{p}{:} \PYG{p}{\PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}name\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}周友国\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}courses\PYGZdq{}}\PYG{p}{:} \PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}54830\PYGZdq{}}\PYG{p}{]\PYGZcb{},}
+	    \PYG{l+s+s2}{\PYGZdq{}T11\PYGZdq{}}\PYG{p}{:} \PYG{p}{\PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}name\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}孙文\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}courses\PYGZdq{}}\PYG{p}{:} \PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}54976\PYGZdq{}}\PYG{p}{]\PYGZcb{},}
+	    \PYG{l+s+s2}{\PYGZdq{}T12\PYGZdq{}}\PYG{p}{:} \PYG{p}{\PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}name\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}项峰炎\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}courses\PYGZdq{}}\PYG{p}{:} \PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}54830\PYGZdq{}}\PYG{p}{]\PYGZcb{},}
+	    \PYG{l+s+s2}{\PYGZdq{}T13\PYGZdq{}}\PYG{p}{:} \PYG{p}{\PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}name\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}项健德\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}courses\PYGZdq{}}\PYG{p}{:} \PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}54569\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}54976\PYGZdq{}}\PYG{p}{]\PYGZcb{},}
+	    \PYG{l+s+s2}{\PYGZdq{}T14\PYGZdq{}}\PYG{p}{:} \PYG{p}{\PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}name\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}李艺祥\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}courses\PYGZdq{}}\PYG{p}{:} \PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}54830\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}54976\PYGZdq{}}\PYG{p}{]\PYGZcb{},}
+	    \PYG{l+s+s2}{\PYGZdq{}T15\PYGZdq{}}\PYG{p}{:} \PYG{p}{\PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}name\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}祝桥\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}courses\PYGZdq{}}\PYG{p}{:} \PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}54830\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}54976\PYGZdq{}}\PYG{p}{]\PYGZcb{},}
+	    \PYG{l+s+s2}{\PYGZdq{}T16\PYGZdq{}}\PYG{p}{:} \PYG{p}{\PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}name\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}郑宏文\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}courses\PYGZdq{}}\PYG{p}{:} \PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}54569\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}54976\PYGZdq{}}\PYG{p}{]\PYGZcb{},}
+	    \PYG{l+s+s2}{\PYGZdq{}T17\PYGZdq{}}\PYG{p}{:} \PYG{p}{\PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}name\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}赵国健\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}courses\PYGZdq{}}\PYG{p}{:} \PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}54976\PYGZdq{}}\PYG{p}{]\PYGZcb{},}
+	    \PYG{l+s+s2}{\PYGZdq{}T18\PYGZdq{}}\PYG{p}{:} \PYG{p}{\PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}name\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}郑军锦\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}courses\PYGZdq{}}\PYG{p}{:} \PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}52005\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}53202\PYGZdq{}}\PYG{p}{]\PYGZcb{},}
+	    \PYG{l+s+s2}{\PYGZdq{}T19\PYGZdq{}}\PYG{p}{:} \PYG{p}{\PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}name\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}董友裕\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}courses\PYGZdq{}}\PYG{p}{:} \PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}53230\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}54200\PYGZdq{}}\PYG{p}{]\PYGZcb{},}
+	    \PYG{l+s+s2}{\PYGZdq{}T20\PYGZdq{}}\PYG{p}{:} \PYG{p}{\PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}name\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}童仁兴\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}courses\PYGZdq{}}\PYG{p}{:} \PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}53230\PYGZdq{}}\PYG{p}{]\PYGZcb{},}
+	    \PYG{l+s+s2}{\PYGZdq{}T21\PYGZdq{}}\PYG{p}{:} \PYG{p}{\PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}name\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}陈南坚\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}courses\PYGZdq{}}\PYG{p}{:} \PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}54459\PYGZdq{}}\PYG{p}{]\PYGZcb{},}
+	    \PYG{l+s+s2}{\PYGZdq{}T22\PYGZdq{}}\PYG{p}{:} \PYG{p}{\PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}name\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}项友志\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}courses\PYGZdq{}}\PYG{p}{:} \PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}54200\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}54976\PYGZdq{}}\PYG{p}{]\PYGZcb{}}
+	\PYG{p}{\PYGZcb{}}
+	\PYG{n}{schedule\PYGZus{}requirements} \PYG{o}{=} \PYG{p}{\PYGZob{}}
+	    \PYG{l+s+s2}{\PYGZdq{}1班\PYGZdq{}}\PYG{p}{:} \PYG{p}{\PYGZob{}}
+	        \PYG{l+s+s2}{\PYGZdq{}52005\PYGZdq{}}\PYG{p}{:} \PYG{l+m+mi}{1}\PYG{p}{,}
+	        \PYG{l+s+s2}{\PYGZdq{}53202\PYGZdq{}}\PYG{p}{:} \PYG{l+m+mi}{1}\PYG{p}{,}
+	        \PYG{l+s+s2}{\PYGZdq{}53215\PYGZdq{}}\PYG{p}{:} \PYG{l+m+mi}{1}\PYG{p}{,}
+	        \PYG{l+s+s2}{\PYGZdq{}53230\PYGZdq{}}\PYG{p}{:} \PYG{l+m+mi}{1}\PYG{p}{,}
+	        \PYG{l+s+s2}{\PYGZdq{}54007\PYGZdq{}}\PYG{p}{:} \PYG{l+m+mi}{2}\PYG{p}{,}
+	        \PYG{l+s+s2}{\PYGZdq{}54200\PYGZdq{}}\PYG{p}{:} \PYG{l+m+mi}{0}\PYG{p}{,}
+	        \PYG{l+s+s2}{\PYGZdq{}54459\PYGZdq{}}\PYG{p}{:} \PYG{l+m+mi}{0}\PYG{p}{,}
+	        \PYG{l+s+s2}{\PYGZdq{}54569\PYGZdq{}}\PYG{p}{:} \PYG{l+m+mi}{1}\PYG{p}{,}
+	        \PYG{l+s+s2}{\PYGZdq{}54830\PYGZdq{}}\PYG{p}{:} \PYG{l+m+mi}{1}\PYG{p}{,}
+	        \PYG{l+s+s2}{\PYGZdq{}54976\PYGZdq{}}\PYG{p}{:} \PYG{l+m+mi}{1}
+	    \PYG{p}{\PYGZcb{},}
+	    \PYG{l+s+s2}{\PYGZdq{}2班\PYGZdq{}}\PYG{p}{:} \PYG{p}{\PYGZob{}}
+	        \PYG{l+s+s2}{\PYGZdq{}52005\PYGZdq{}}\PYG{p}{:} \PYG{l+m+mi}{1}\PYG{p}{,}
+	        \PYG{l+s+s2}{\PYGZdq{}53202\PYGZdq{}}\PYG{p}{:} \PYG{l+m+mi}{1}\PYG{p}{,}
+	        \PYG{l+s+s2}{\PYGZdq{}53215\PYGZdq{}}\PYG{p}{:} \PYG{l+m+mi}{1}\PYG{p}{,}
+	        \PYG{l+s+s2}{\PYGZdq{}53230\PYGZdq{}}\PYG{p}{:} \PYG{l+m+mi}{1}\PYG{p}{,}
+	        \PYG{l+s+s2}{\PYGZdq{}54007\PYGZdq{}}\PYG{p}{:} \PYG{l+m+mi}{0}\PYG{p}{,}
+	        \PYG{l+s+s2}{\PYGZdq{}54200\PYGZdq{}}\PYG{p}{:} \PYG{l+m+mi}{2}\PYG{p}{,}
+	        \PYG{l+s+s2}{\PYGZdq{}54459\PYGZdq{}}\PYG{p}{:} \PYG{l+m+mi}{0}\PYG{p}{,}
+	        \PYG{l+s+s2}{\PYGZdq{}54569\PYGZdq{}}\PYG{p}{:} \PYG{l+m+mi}{1}\PYG{p}{,}
+	        \PYG{l+s+s2}{\PYGZdq{}54830\PYGZdq{}}\PYG{p}{:} \PYG{l+m+mi}{1}\PYG{p}{,}
+	        \PYG{l+s+s2}{\PYGZdq{}54976\PYGZdq{}}\PYG{p}{:} \PYG{l+m+mi}{1}
+	    \PYG{p}{\PYGZcb{},}
+	    \PYG{l+s+s2}{\PYGZdq{}3班\PYGZdq{}}\PYG{p}{:} \PYG{p}{\PYGZob{}}
+	        \PYG{l+s+s2}{\PYGZdq{}52005\PYGZdq{}}\PYG{p}{:} \PYG{l+m+mi}{1}\PYG{p}{,}
+	        \PYG{l+s+s2}{\PYGZdq{}53202\PYGZdq{}}\PYG{p}{:} \PYG{l+m+mi}{1}\PYG{p}{,}
+	        \PYG{l+s+s2}{\PYGZdq{}53215\PYGZdq{}}\PYG{p}{:} \PYG{l+m+mi}{1}\PYG{p}{,}
+	        \PYG{l+s+s2}{\PYGZdq{}53230\PYGZdq{}}\PYG{p}{:} \PYG{l+m+mi}{1}\PYG{p}{,}
+	        \PYG{l+s+s2}{\PYGZdq{}54007\PYGZdq{}}\PYG{p}{:} \PYG{l+m+mi}{0}\PYG{p}{,}
+	        \PYG{l+s+s2}{\PYGZdq{}54200\PYGZdq{}}\PYG{p}{:} \PYG{l+m+mi}{0}\PYG{p}{,}
+	        \PYG{l+s+s2}{\PYGZdq{}54459\PYGZdq{}}\PYG{p}{:} \PYG{l+m+mi}{2}\PYG{p}{,}
+	        \PYG{l+s+s2}{\PYGZdq{}54569\PYGZdq{}}\PYG{p}{:} \PYG{l+m+mi}{1}\PYG{p}{,}
+	        \PYG{l+s+s2}{\PYGZdq{}54830\PYGZdq{}}\PYG{p}{:} \PYG{l+m+mi}{1}\PYG{p}{,}
+	        \PYG{l+s+s2}{\PYGZdq{}54976\PYGZdq{}}\PYG{p}{:} \PYG{l+m+mi}{1}
+	    \PYG{p}{\PYGZcb{}}
+	\PYG{p}{\PYGZcb{}}
+	\PYG{n}{time\PYGZus{}slots} \PYG{o}{=} \PYG{p}{\PYGZob{}}
+	    \PYG{l+m+mi}{1}\PYG{p}{:} \PYG{p}{\PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}start\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}8:00\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}end\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}9:50\PYGZdq{}}\PYG{p}{\PYGZcb{},}
+	    \PYG{l+m+mi}{2}\PYG{p}{:} \PYG{p}{\PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}start\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}10:10\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}end\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}12:00\PYGZdq{}}\PYG{p}{\PYGZcb{},}
+	    \PYG{l+m+mi}{3}\PYG{p}{:} \PYG{p}{\PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}start\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}14:00\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}end\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}15:50\PYGZdq{}}\PYG{p}{\PYGZcb{},}
+	    \PYG{l+m+mi}{4}\PYG{p}{:} \PYG{p}{\PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}start\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}16:10\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}end\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}18:00\PYGZdq{}}\PYG{p}{\PYGZcb{},}
+	    \PYG{l+m+mi}{5}\PYG{p}{:} \PYG{p}{\PYGZob{}}\PYG{l+s+s2}{\PYGZdq{}start\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}19:30\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}end\PYGZdq{}}\PYG{p}{:} \PYG{l+s+s2}{\PYGZdq{}21:20\PYGZdq{}}\PYG{p}{\PYGZcb{}}
+	\PYG{p}{\PYGZcb{}}
+	\PYG{n}{days} \PYG{o}{=} \PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}Mon\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}Tue\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}Wed\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}Thu\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}Fri\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}Sat\PYGZdq{}}\PYG{p}{]}
+	
+	\PYG{c+c1}{\PYGZsh{} 遗传算法参数}
+	\PYG{n}{POPULATION\PYGZus{}SIZE} \PYG{o}{=} \PYG{l+m+mi}{500}  \PYG{c+c1}{\PYGZsh{} 增加种群大小}
+	\PYG{n}{MUTATION\PYGZus{}RATE} \PYG{o}{=} \PYG{l+m+mf}{0.01}  \PYG{c+c1}{\PYGZsh{} 调整变异率}
+	\PYG{n}{CROSSOVER\PYGZus{}RATE} \PYG{o}{=} \PYG{l+m+mf}{0.7}  \PYG{c+c1}{\PYGZsh{} 调整交叉率}
+	\PYG{n}{GENERATIONS} \PYG{o}{=} \PYG{l+m+mi}{10000}  \PYG{c+c1}{\PYGZsh{} 增加最大代数}
+	\PYG{n}{TOURNAMENT\PYGZus{}SIZE} \PYG{o}{=} \PYG{l+m+mi}{7}  \PYG{c+c1}{\PYGZsh{} 调整锦标赛选择的大小}
+	\PYG{n}{ELITE\PYGZus{}SIZE} \PYG{o}{=} \PYG{l+m+mi}{2}  \PYG{c+c1}{\PYGZsh{} 精英保留策略，保留前2个优质个体}
+	
+	
+	\PYG{c+c1}{\PYGZsh{} 课程安排类}
+	\PYG{k}{class} \PYG{n+nc}{CourseArrangement}\PYG{p}{:}
+	    \PYG{k}{def} \PYG{n+nf+fm}{\PYGZus{}\PYGZus{}init\PYGZus{}\PYGZus{}}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{p}{,} \PYG{n}{class\PYGZus{}name}\PYG{p}{,} \PYG{n}{course\PYGZus{}id}\PYG{p}{,} \PYG{n}{teacher\PYGZus{}id}\PYG{p}{,} \PYG{n}{classroom}\PYG{p}{,} \PYG{n}{day}\PYG{p}{,} \PYG{n}{time\PYGZus{}slot}\PYG{p}{):}
+	        \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{class\PYGZus{}name} \PYG{o}{=} \PYG{n}{class\PYGZus{}name}
+	        \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{course\PYGZus{}id} \PYG{o}{=} \PYG{n}{course\PYGZus{}id}
+	        \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{teacher\PYGZus{}id} \PYG{o}{=} \PYG{n}{teacher\PYGZus{}id}
+	        \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{classroom} \PYG{o}{=} \PYG{n}{classroom}
+	        \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{day} \PYG{o}{=} \PYG{n}{day}
+	        \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{time\PYGZus{}slot} \PYG{o}{=} \PYG{n}{time\PYGZus{}slot}
+	
+	    \PYG{k}{def} \PYG{n+nf+fm}{\PYGZus{}\PYGZus{}str\PYGZus{}\PYGZus{}}\PYG{p}{(}\PYG{n+nb+bp}{self}\PYG{p}{):}
+	        \PYG{k}{return} \PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZob{}}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{class\PYGZus{}name}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{courses}\PYG{p}{[}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{course\PYGZus{}id}\PYG{p}{]}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ }\PYG{l+s+se}{\PYGZbs{}}
+\PYG{l+s+s2}{		        }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{teachers}\PYG{p}{[}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{teacher\PYGZus{}id}\PYG{p}{][}\PYG{l+s+s1}{\PYGZsq{}name\PYGZsq{}}\PYG{p}{]}\PYG{l+s+si}{\PYGZcb{}\PYGZob{}}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{classroom}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{days}\PYG{p}{[}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{day}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{p}{]}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ }\PYG{l+s+se}{\PYGZbs{}}
+\PYG{l+s+s2}{		        }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{time\PYGZus{}slots}\PYG{p}{[}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{time\PYGZus{}slot}\PYG{p}{][}\PYG{l+s+s1}{\PYGZsq{}start\PYGZsq{}}\PYG{p}{]}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZhy{}}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{time\PYGZus{}slots}\PYG{p}{[}\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{time\PYGZus{}slot}\PYG{p}{][}\PYG{l+s+s1}{\PYGZsq{}end\PYGZsq{}}\PYG{p}{]}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}
+	
+	
+	\PYG{c+c1}{\PYGZsh{} 生成初始种群}
+	\PYG{k}{def} \PYG{n+nf}{generate\PYGZus{}initial\PYGZus{}population}\PYG{p}{():}
+	    \PYG{n}{population} \PYG{o}{=} \PYG{p}{[]}
+	    \PYG{k}{for} \PYG{n}{\PYGZus{}} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n}{POPULATION\PYGZus{}SIZE}\PYG{p}{):}
+	        \PYG{n}{schedule} \PYG{o}{=} \PYG{p}{[]}
+	        \PYG{k}{for} \PYG{n}{class\PYGZus{}name} \PYG{o+ow}{in} \PYG{n}{classes}\PYG{p}{:}
+	            \PYG{k}{for} \PYG{n}{course\PYGZus{}id}\PYG{p}{,} \PYG{n}{weekly\PYGZus{}hours} \PYG{o+ow}{in} \PYG{n}{schedule\PYGZus{}requirements}\PYG{p}{[}\PYG{n}{class\PYGZus{}name}\PYG{p}{]}\PYG{o}{.}\PYG{n}{items}\PYG{p}{():}
+	                \PYG{k}{for} \PYG{n}{\PYGZus{}} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n}{weekly\PYGZus{}hours}\PYG{p}{):}
+	                    \PYG{n}{possible\PYGZus{}teachers} \PYG{o}{=} \PYG{p}{[}\PYG{n}{t} \PYGZbs{}
+	                    \PYG{k}{for} \PYG{n}{t} \PYG{o+ow}{in} \PYG{n}{teachers} \PYG{k}{if} \PYG{n}{course\PYGZus{}id} \PYG{o+ow}{in} \PYG{n}{teachers}\PYG{p}{[}\PYG{n}{t}\PYG{p}{][}\PYG{l+s+s2}{\PYGZdq{}courses\PYGZdq{}}\PYG{p}{]]}
+	                    \PYG{n}{teacher\PYGZus{}id} \PYG{o}{=} \PYG{n}{random}\PYG{o}{.}\PYG{n}{choice}\PYG{p}{(}\PYG{n}{possible\PYGZus{}teachers}\PYG{p}{)}
+	                    \PYG{n}{classroom} \PYG{o}{=} \PYG{n}{random}\PYG{o}{.}\PYG{n}{choice}\PYG{p}{(}\PYG{n}{classrooms}\PYG{p}{)}
+	                    \PYG{n}{day} \PYG{o}{=} \PYG{n}{random}\PYG{o}{.}\PYG{n}{randint}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{l+m+mi}{6}\PYG{p}{)}
+	                    \PYG{n}{time\PYGZus{}slot} \PYG{o}{=} \PYG{n}{random}\PYG{o}{.}\PYG{n}{randint}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{l+m+mi}{5}\PYG{p}{)}
+	                    \PYG{n}{schedule}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{n}{CourseArrangement}\PYG{p}{(}\PYG{n}{class\PYGZus{}name}\PYG{p}{,} \PYG{n}{course\PYGZus{}id}\PYG{p}{,} \PYG{n}{teacher\PYGZus{}id}\PYG{p}{,} \PYGZbs{}
+	                                                      \PYG{n}{classroom}\PYG{p}{,} \PYG{n}{day}\PYG{p}{,} \PYG{n}{time\PYGZus{}slot}\PYG{p}{))}
+	        \PYG{n}{population}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{n}{schedule}\PYG{p}{)}
+	    \PYG{k}{return} \PYG{n}{population}
+	
+	
+	\PYG{c+c1}{\PYGZsh{} 计算适应度}
+	\PYG{k}{def} \PYG{n+nf}{calculate\PYGZus{}fitness}\PYG{p}{(}\PYG{n}{individual}\PYG{p}{):}
+	    \PYG{n}{conflict\PYGZus{}count} \PYG{o}{=} \PYG{l+m+mi}{0}
+	    \PYG{n}{course\PYGZus{}spread} \PYG{o}{=} \PYG{l+m+mi}{0}
+	    \PYG{n}{class\PYGZus{}spread} \PYG{o}{=} \PYG{l+m+mi}{0}
+	
+	    \PYG{n}{teacher\PYGZus{}schedule} \PYG{o}{=} \PYG{p}{\PYGZob{}}\PYG{n}{t}\PYG{p}{:} \PYG{n+nb}{set}\PYG{p}{()} \PYG{k}{for} \PYG{n}{t} \PYG{o+ow}{in} \PYG{n}{teachers}\PYG{p}{\PYGZcb{}}
+	    \PYG{k}{for} \PYG{n}{arr} \PYG{o+ow}{in} \PYG{n}{individual}\PYG{p}{:}
+	        \PYG{n}{time\PYGZus{}key} \PYG{o}{=} \PYG{p}{(}\PYG{n}{arr}\PYG{o}{.}\PYG{n}{day}\PYG{p}{,} \PYG{n}{arr}\PYG{o}{.}\PYG{n}{time\PYGZus{}slot}\PYG{p}{)}
+	        \PYG{k}{if} \PYG{n}{time\PYGZus{}key} \PYG{o+ow}{in} \PYG{n}{teacher\PYGZus{}schedule}\PYG{p}{[}\PYG{n}{arr}\PYG{o}{.}\PYG{n}{teacher\PYGZus{}id}\PYG{p}{]:}
+	            \PYG{n}{conflict\PYGZus{}count} \PYG{o}{+=} \PYG{l+m+mi}{1}
+	        \PYG{k}{else}\PYG{p}{:}
+	            \PYG{n}{teacher\PYGZus{}schedule}\PYG{p}{[}\PYG{n}{arr}\PYG{o}{.}\PYG{n}{teacher\PYGZus{}id}\PYG{p}{]}\PYG{o}{.}\PYG{n}{add}\PYG{p}{(}\PYG{n}{time\PYGZus{}key}\PYG{p}{)}
+	
+	    \PYG{n}{classroom\PYGZus{}schedule} \PYG{o}{=} \PYG{p}{\PYGZob{}}\PYG{n}{c}\PYG{p}{:} \PYG{n+nb}{set}\PYG{p}{()} \PYG{k}{for} \PYG{n}{c} \PYG{o+ow}{in} \PYG{n}{classrooms}\PYG{p}{\PYGZcb{}}
+	    \PYG{k}{for} \PYG{n}{arr} \PYG{o+ow}{in} \PYG{n}{individual}\PYG{p}{:}
+	        \PYG{n}{time\PYGZus{}key} \PYG{o}{=} \PYG{p}{(}\PYG{n}{arr}\PYG{o}{.}\PYG{n}{day}\PYG{p}{,} \PYG{n}{arr}\PYG{o}{.}\PYG{n}{time\PYGZus{}slot}\PYG{p}{)}
+	        \PYG{k}{if} \PYG{n}{time\PYGZus{}key} \PYG{o+ow}{in} \PYG{n}{classroom\PYGZus{}schedule}\PYG{p}{[}\PYG{n}{arr}\PYG{o}{.}\PYG{n}{classroom}\PYG{p}{]:}
+	            \PYG{n}{conflict\PYGZus{}count} \PYG{o}{+=} \PYG{l+m+mi}{1}
+	        \PYG{k}{else}\PYG{p}{:}
+	            \PYG{n}{classroom\PYGZus{}schedule}\PYG{p}{[}\PYG{n}{arr}\PYG{o}{.}\PYG{n}{classroom}\PYG{p}{]}\PYG{o}{.}\PYG{n}{add}\PYG{p}{(}\PYG{n}{time\PYGZus{}key}\PYG{p}{)}
+	
+	    \PYG{n}{class\PYGZus{}schedule} \PYG{o}{=} \PYG{p}{\PYGZob{}}\PYG{n+nb+bp}{cls}\PYG{p}{:} \PYG{n+nb}{set}\PYG{p}{()} \PYG{k}{for} \PYG{n+nb+bp}{cls} \PYG{o+ow}{in} \PYG{n}{classes}\PYG{p}{\PYGZcb{}}
+	    \PYG{k}{for} \PYG{n}{arr} \PYG{o+ow}{in} \PYG{n}{individual}\PYG{p}{:}
+	        \PYG{n}{time\PYGZus{}key} \PYG{o}{=} \PYG{p}{(}\PYG{n}{arr}\PYG{o}{.}\PYG{n}{day}\PYG{p}{,} \PYG{n}{arr}\PYG{o}{.}\PYG{n}{time\PYGZus{}slot}\PYG{p}{)}
+	        \PYG{k}{if} \PYG{n}{time\PYGZus{}key} \PYG{o+ow}{in} \PYG{n}{class\PYGZus{}schedule}\PYG{p}{[}\PYG{n}{arr}\PYG{o}{.}\PYG{n}{class\PYGZus{}name}\PYG{p}{]:}
+	            \PYG{n}{conflict\PYGZus{}count} \PYG{o}{+=} \PYG{l+m+mi}{1}
+	        \PYG{k}{else}\PYG{p}{:}
+	            \PYG{n}{class\PYGZus{}schedule}\PYG{p}{[}\PYG{n}{arr}\PYG{o}{.}\PYG{n}{class\PYGZus{}name}\PYG{p}{]}\PYG{o}{.}\PYG{n}{add}\PYG{p}{(}\PYG{n}{time\PYGZus{}key}\PYG{p}{)}
+	
+	    \PYG{n}{course\PYGZus{}days} \PYG{o}{=} \PYG{p}{\PYGZob{}\PYGZcb{}}
+	    \PYG{k}{for} \PYG{n}{arr} \PYG{o+ow}{in} \PYG{n}{individual}\PYG{p}{:}
+	        \PYG{k}{if} \PYG{p}{(}\PYG{n}{arr}\PYG{o}{.}\PYG{n}{class\PYGZus{}name}\PYG{p}{,} \PYG{n}{arr}\PYG{o}{.}\PYG{n}{course\PYGZus{}id}\PYG{p}{)} \PYG{o+ow}{not} \PYG{o+ow}{in} \PYG{n}{course\PYGZus{}days}\PYG{p}{:}
+	            \PYG{n}{course\PYGZus{}days}\PYG{p}{[(}\PYG{n}{arr}\PYG{o}{.}\PYG{n}{class\PYGZus{}name}\PYG{p}{,} \PYG{n}{arr}\PYG{o}{.}\PYG{n}{course\PYGZus{}id}\PYG{p}{)]} \PYG{o}{=} \PYG{n+nb}{set}\PYG{p}{()}
+	        \PYG{n}{course\PYGZus{}days}\PYG{p}{[(}\PYG{n}{arr}\PYG{o}{.}\PYG{n}{class\PYGZus{}name}\PYG{p}{,} \PYG{n}{arr}\PYG{o}{.}\PYG{n}{course\PYGZus{}id}\PYG{p}{)]}\PYG{o}{.}\PYG{n}{add}\PYG{p}{(}\PYG{n}{arr}\PYG{o}{.}\PYG{n}{day}\PYG{p}{)}
+	
+	    \PYG{k}{for} \PYG{n}{key} \PYG{o+ow}{in} \PYG{n}{course\PYGZus{}days}\PYG{p}{:}
+	        \PYG{n}{days\PYGZus{}used} \PYG{o}{=} \PYG{n+nb}{sorted}\PYG{p}{(}\PYG{n}{course\PYGZus{}days}\PYG{p}{[}\PYG{n}{key}\PYG{p}{])}
+	        \PYG{k}{for} \PYG{n}{i} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{days\PYGZus{}used}\PYG{p}{)):}
+	            \PYG{n}{course\PYGZus{}spread} \PYG{o}{+=} \PYG{p}{(}\PYG{n}{days\PYGZus{}used}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]} \PYG{o}{\PYGZhy{}} \PYG{n}{days\PYGZus{}used}\PYG{p}{[}\PYG{n}{i} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{1}\PYG{p}{]} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{1}\PYG{p}{)}
+	
+	    \PYG{n}{class\PYGZus{}day\PYGZus{}counts} \PYG{o}{=} \PYG{p}{\PYGZob{}}\PYG{n+nb+bp}{cls}\PYG{p}{:} \PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]} \PYG{o}{*} \PYG{l+m+mi}{7} \PYG{k}{for} \PYG{n+nb+bp}{cls} \PYG{o+ow}{in} \PYG{n}{classes}\PYG{p}{\PYGZcb{}}
+	    \PYG{k}{for} \PYG{n}{arr} \PYG{o+ow}{in} \PYG{n}{individual}\PYG{p}{:}
+	        \PYG{n}{class\PYGZus{}day\PYGZus{}counts}\PYG{p}{[}\PYG{n}{arr}\PYG{o}{.}\PYG{n}{class\PYGZus{}name}\PYG{p}{][}\PYG{n}{arr}\PYG{o}{.}\PYG{n}{day}\PYG{p}{]} \PYG{o}{+=} \PYG{l+m+mi}{1}
+	
+	    \PYG{k}{for} \PYG{n+nb+bp}{cls} \PYG{o+ow}{in} \PYG{n}{classes}\PYG{p}{:}
+	        \PYG{n}{avg} \PYG{o}{=} \PYG{n+nb}{sum}\PYG{p}{(}\PYG{n}{class\PYGZus{}day\PYGZus{}counts}\PYG{p}{[}\PYG{n+nb+bp}{cls}\PYG{p}{][}\PYG{l+m+mi}{1}\PYG{p}{:}\PYG{l+m+mi}{7}\PYG{p}{])} \PYG{o}{/} \PYG{l+m+mi}{6}
+	        \PYG{k}{for} \PYG{n}{day} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{l+m+mi}{7}\PYG{p}{):}
+	            \PYG{n}{class\PYGZus{}spread} \PYG{o}{+=} \PYG{n+nb}{abs}\PYG{p}{(}\PYG{n}{class\PYGZus{}day\PYGZus{}counts}\PYG{p}{[}\PYG{n+nb+bp}{cls}\PYG{p}{][}\PYG{n}{day}\PYG{p}{]} \PYG{o}{\PYGZhy{}} \PYG{n}{avg}\PYG{p}{)}
+	
+	    \PYG{n}{fitness} \PYG{o}{=} \PYG{l+m+mi}{1} \PYG{o}{/} \PYG{p}{(}\PYG{n}{conflict\PYGZus{}count} \PYG{o}{+} \PYG{l+m+mi}{1}\PYG{p}{)}
+	    \PYG{n}{fitness} \PYG{o}{+=} \PYG{n}{course\PYGZus{}spread} \PYG{o}{*} \PYG{l+m+mf}{0.01}
+	    \PYG{n}{fitness} \PYG{o}{+=} \PYG{n}{class\PYGZus{}spread} \PYG{o}{*} \PYG{l+m+mf}{0.01}
+	
+	    \PYG{k}{return} \PYG{n}{fitness}
+	
+	
+	\PYG{c+c1}{\PYGZsh{} 选择操作（锦标赛选择）}
+	\PYG{k}{def} \PYG{n+nf}{select\PYGZus{}parent}\PYG{p}{(}\PYG{n}{population}\PYG{p}{):}
+	    \PYG{n}{selected} \PYG{o}{=} \PYG{n}{random}\PYG{o}{.}\PYG{n}{sample}\PYG{p}{(}\PYG{n}{population}\PYG{p}{,} \PYG{n}{TOURNAMENT\PYGZus{}SIZE}\PYG{p}{)}
+	    \PYG{k}{return} \PYG{n+nb}{max}\PYG{p}{(}\PYG{n}{selected}\PYG{p}{,} \PYG{n}{key}\PYG{o}{=}\PYG{k}{lambda} \PYG{n}{x}\PYG{p}{:} \PYG{n}{x}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{])}
+	
+	
+	\PYG{c+c1}{\PYGZsh{} 交叉操作}
+	\PYG{k}{def} \PYG{n+nf}{crossover}\PYG{p}{(}\PYG{n}{parent1}\PYG{p}{,} \PYG{n}{parent2}\PYG{p}{):}
+	    \PYG{k}{if} \PYG{n}{random}\PYG{o}{.}\PYG{n}{random}\PYG{p}{()} \PYG{o}{\PYGZgt{}} \PYG{n}{CROSSOVER\PYGZus{}RATE}\PYG{p}{:}
+	        \PYG{k}{return} \PYG{n}{parent1}
+	
+	    \PYG{n}{child} \PYG{o}{=} \PYG{p}{[]}
+	    \PYG{k}{for} \PYG{n}{i} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{parent1}\PYG{p}{)):}
+	        \PYG{k}{if} \PYG{n}{random}\PYG{o}{.}\PYG{n}{random}\PYG{p}{()} \PYG{o}{\PYGZlt{}} \PYG{l+m+mf}{0.5}\PYG{p}{:}
+	            \PYG{n}{child}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{n}{parent1}\PYG{p}{[}\PYG{n}{i}\PYG{p}{])}
+	        \PYG{k}{else}\PYG{p}{:}
+	            \PYG{n}{child}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{n}{parent2}\PYG{p}{[}\PYG{n}{i}\PYG{p}{])}
+	
+	    \PYG{c+c1}{\PYGZsh{} 冲突解决：教师时间冲突}
+	    \PYG{n}{teacher\PYGZus{}schedule} \PYG{o}{=} \PYG{p}{\PYGZob{}}\PYG{n}{t}\PYG{p}{:} \PYG{n+nb}{set}\PYG{p}{()} \PYG{k}{for} \PYG{n}{t} \PYG{o+ow}{in} \PYG{n}{teachers}\PYG{p}{\PYGZcb{}}
+	    \PYG{k}{for} \PYG{n}{arr} \PYG{o+ow}{in} \PYG{n}{child}\PYG{p}{:}
+	        \PYG{n}{time\PYGZus{}key} \PYG{o}{=} \PYG{p}{(}\PYG{n}{arr}\PYG{o}{.}\PYG{n}{day}\PYG{p}{,} \PYG{n}{arr}\PYG{o}{.}\PYG{n}{time\PYGZus{}slot}\PYG{p}{)}
+	        \PYG{n}{attempt} \PYG{o}{=} \PYG{l+m+mi}{0}
+	        \PYG{n}{max\PYGZus{}attempts} \PYG{o}{=} \PYG{l+m+mi}{100}  \PYG{c+c1}{\PYGZsh{} 设置最大尝试次数}
+	        \PYG{k}{while} \PYG{n}{time\PYGZus{}key} \PYG{o+ow}{in} \PYG{n}{teacher\PYGZus{}schedule}\PYG{p}{[}\PYG{n}{arr}\PYG{o}{.}\PYG{n}{teacher\PYGZus{}id}\PYG{p}{]} \PYG{o+ow}{and} \PYG{n}{attempt} \PYG{o}{\PYGZlt{}} \PYG{n}{max\PYGZus{}attempts}\PYG{p}{:}
+	            \PYG{n}{arr}\PYG{o}{.}\PYG{n}{day} \PYG{o}{=} \PYG{n}{random}\PYG{o}{.}\PYG{n}{randint}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{l+m+mi}{6}\PYG{p}{)}
+	            \PYG{n}{arr}\PYG{o}{.}\PYG{n}{time\PYGZus{}slot} \PYG{o}{=} \PYG{n}{random}\PYG{o}{.}\PYG{n}{randint}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{l+m+mi}{5}\PYG{p}{)}
+	            \PYG{n}{time\PYGZus{}key} \PYG{o}{=} \PYG{p}{(}\PYG{n}{arr}\PYG{o}{.}\PYG{n}{day}\PYG{p}{,} \PYG{n}{arr}\PYG{o}{.}\PYG{n}{time\PYGZus{}slot}\PYG{p}{)}
+	            \PYG{n}{attempt} \PYG{o}{+=} \PYG{l+m+mi}{1}
+	        \PYG{n}{teacher\PYGZus{}schedule}\PYG{p}{[}\PYG{n}{arr}\PYG{o}{.}\PYG{n}{teacher\PYGZus{}id}\PYG{p}{]}\PYG{o}{.}\PYG{n}{add}\PYG{p}{(}\PYG{n}{time\PYGZus{}key}\PYG{p}{)}
+	
+	    \PYG{c+c1}{\PYGZsh{} 冲突解决：教室时间冲突}
+	    \PYG{n}{classroom\PYGZus{}schedule} \PYG{o}{=} \PYG{p}{\PYGZob{}}\PYG{n}{c}\PYG{p}{:} \PYG{n+nb}{set}\PYG{p}{()} \PYG{k}{for} \PYG{n}{c} \PYG{o+ow}{in} \PYG{n}{classrooms}\PYG{p}{\PYGZcb{}}
+	    \PYG{k}{for} \PYG{n}{arr} \PYG{o+ow}{in} \PYG{n}{child}\PYG{p}{:}
+	        \PYG{n}{time\PYGZus{}key} \PYG{o}{=} \PYG{p}{(}\PYG{n}{arr}\PYG{o}{.}\PYG{n}{day}\PYG{p}{,} \PYG{n}{arr}\PYG{o}{.}\PYG{n}{time\PYGZus{}slot}\PYG{p}{)}
+	        \PYG{n}{attempt} \PYG{o}{=} \PYG{l+m+mi}{0}
+	        \PYG{k}{while} \PYG{n}{time\PYGZus{}key} \PYG{o+ow}{in} \PYG{n}{classroom\PYGZus{}schedule}\PYG{p}{[}\PYG{n}{arr}\PYG{o}{.}\PYG{n}{classroom}\PYG{p}{]} \PYG{o+ow}{and} \PYG{n}{attempt} \PYG{o}{\PYGZlt{}} \PYG{n}{max\PYGZus{}attempts}\PYG{p}{:}
+	            \PYG{n}{arr}\PYG{o}{.}\PYG{n}{classroom} \PYG{o}{=} \PYG{n}{random}\PYG{o}{.}\PYG{n}{choice}\PYG{p}{(}\PYG{n}{classrooms}\PYG{p}{)}
+	            \PYG{n}{time\PYGZus{}key} \PYG{o}{=} \PYG{p}{(}\PYG{n}{arr}\PYG{o}{.}\PYG{n}{day}\PYG{p}{,} \PYG{n}{arr}\PYG{o}{.}\PYG{n}{time\PYGZus{}slot}\PYG{p}{)}
+	            \PYG{n}{attempt} \PYG{o}{+=} \PYG{l+m+mi}{1}
+	        \PYG{n}{classroom\PYGZus{}schedule}\PYG{p}{[}\PYG{n}{arr}\PYG{o}{.}\PYG{n}{classroom}\PYG{p}{]}\PYG{o}{.}\PYG{n}{add}\PYG{p}{(}\PYG{n}{time\PYGZus{}key}\PYG{p}{)}
+	
+	    \PYG{c+c1}{\PYGZsh{} 冲突解决：班级时间冲突}
+	    \PYG{n}{class\PYGZus{}schedule} \PYG{o}{=} \PYG{p}{\PYGZob{}}\PYG{n+nb+bp}{cls}\PYG{p}{:} \PYG{n+nb}{set}\PYG{p}{()} \PYG{k}{for} \PYG{n+nb+bp}{cls} \PYG{o+ow}{in} \PYG{n}{classes}\PYG{p}{\PYGZcb{}}
+	    \PYG{k}{for} \PYG{n}{arr} \PYG{o+ow}{in} \PYG{n}{child}\PYG{p}{:}
+	        \PYG{n}{time\PYGZus{}key} \PYG{o}{=} \PYG{p}{(}\PYG{n}{arr}\PYG{o}{.}\PYG{n}{day}\PYG{p}{,} \PYG{n}{arr}\PYG{o}{.}\PYG{n}{time\PYGZus{}slot}\PYG{p}{)}
+	        \PYG{n}{attempt} \PYG{o}{=} \PYG{l+m+mi}{0}
+	        \PYG{k}{while} \PYG{n}{time\PYGZus{}key} \PYG{o+ow}{in} \PYG{n}{class\PYGZus{}schedule}\PYG{p}{[}\PYG{n}{arr}\PYG{o}{.}\PYG{n}{class\PYGZus{}name}\PYG{p}{]} \PYG{o+ow}{and} \PYG{n}{attempt} \PYG{o}{\PYGZlt{}} \PYG{n}{max\PYGZus{}attempts}\PYG{p}{:}
+	            \PYG{n}{arr}\PYG{o}{.}\PYG{n}{day} \PYG{o}{=} \PYG{n}{random}\PYG{o}{.}\PYG{n}{randint}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{l+m+mi}{6}\PYG{p}{)}
+	            \PYG{n}{arr}\PYG{o}{.}\PYG{n}{time\PYGZus{}slot} \PYG{o}{=} \PYG{n}{random}\PYG{o}{.}\PYG{n}{randint}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{l+m+mi}{5}\PYG{p}{)}
+	            \PYG{n}{time\PYGZus{}key} \PYG{o}{=} \PYG{p}{(}\PYG{n}{arr}\PYG{o}{.}\PYG{n}{day}\PYG{p}{,} \PYG{n}{arr}\PYG{o}{.}\PYG{n}{time\PYGZus{}slot}\PYG{p}{)}
+	            \PYG{n}{attempt} \PYG{o}{+=} \PYG{l+m+mi}{1}
+	        \PYG{n}{class\PYGZus{}schedule}\PYG{p}{[}\PYG{n}{arr}\PYG{o}{.}\PYG{n}{class\PYGZus{}name}\PYG{p}{]}\PYG{o}{.}\PYG{n}{add}\PYG{p}{(}\PYG{n}{time\PYGZus{}key}\PYG{p}{)}
+	
+	    \PYG{k}{return} \PYG{n}{child}
+	
+	
+	\PYG{c+c1}{\PYGZsh{} 变异操作}
+	\PYG{k}{def} \PYG{n+nf}{mutate}\PYG{p}{(}\PYG{n}{individual}\PYG{p}{):}
+	    \PYG{k}{for} \PYG{n}{i} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{individual}\PYG{p}{)):}
+	        \PYG{k}{if} \PYG{n}{random}\PYG{o}{.}\PYG{n}{random}\PYG{p}{()} \PYG{o}{\PYGZlt{}} \PYG{n}{MUTATION\PYGZus{}RATE}\PYG{p}{:}
+	            \PYG{n}{possible\PYGZus{}teachers} \PYG{o}{=} \PYG{p}{[}\PYG{n}{t} \PYG{k}{for} \PYG{n}{t} \PYG{o+ow}{in} \PYG{n}{teachers} \PYGZbs{}
+	                                 \PYG{k}{if} \PYG{n}{individual}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{o}{.}\PYG{n}{course\PYGZus{}id} \PYG{o+ow}{in} \PYG{n}{teachers}\PYG{p}{[}\PYG{n}{t}\PYG{p}{][}\PYG{l+s+s2}{\PYGZdq{}courses\PYGZdq{}}\PYG{p}{]]}
+	            \PYG{n}{individual}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{o}{.}\PYG{n}{teacher\PYGZus{}id} \PYG{o}{=} \PYG{n}{random}\PYG{o}{.}\PYG{n}{choice}\PYG{p}{(}\PYG{n}{possible\PYGZus{}teachers}\PYG{p}{)}
+	            \PYG{n}{individual}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{o}{.}\PYG{n}{classroom} \PYG{o}{=} \PYG{n}{random}\PYG{o}{.}\PYG{n}{choice}\PYG{p}{(}\PYG{n}{classrooms}\PYG{p}{)}
+	            \PYG{n}{individual}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{o}{.}\PYG{n}{day} \PYG{o}{=} \PYG{n}{random}\PYG{o}{.}\PYG{n}{randint}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{l+m+mi}{6}\PYG{p}{)}
+	            \PYG{n}{individual}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{o}{.}\PYG{n}{time\PYGZus{}slot} \PYG{o}{=} \PYG{n}{random}\PYG{o}{.}\PYG{n}{randint}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{l+m+mi}{5}\PYG{p}{)}
+	
+	            \PYG{c+c1}{\PYGZsh{} 冲突解决：教师时间冲突}
+	            \PYG{n}{teacher\PYGZus{}schedule} \PYG{o}{=} \PYG{p}{\PYGZob{}}\PYG{n}{t}\PYG{p}{:} \PYG{n+nb}{set}\PYG{p}{()} \PYG{k}{for} \PYG{n}{t} \PYG{o+ow}{in} \PYG{n}{teachers}\PYG{p}{\PYGZcb{}}
+	            \PYG{n}{time\PYGZus{}key} \PYG{o}{=} \PYG{p}{(}\PYG{n}{individual}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{o}{.}\PYG{n}{day}\PYG{p}{,} \PYG{n}{individual}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{o}{.}\PYG{n}{time\PYGZus{}slot}\PYG{p}{)}
+	            \PYG{n}{attempt} \PYG{o}{=} \PYG{l+m+mi}{0}
+	            \PYG{n}{max\PYGZus{}attempts} \PYG{o}{=} \PYG{l+m+mi}{100}  \PYG{c+c1}{\PYGZsh{} 设置最大尝试次数}
+	            \PYG{k}{while} \PYG{n}{time\PYGZus{}key} \PYG{o+ow}{in} \PYG{n}{teacher\PYGZus{}schedule}\PYG{p}{[}\PYG{n}{individual}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{o}{.}\PYG{n}{teacher\PYGZus{}id}\PYG{p}{]} \PYGZbs{}
+	                    \PYG{o+ow}{and} \PYG{n}{attempt} \PYG{o}{\PYGZlt{}} \PYG{n}{max\PYGZus{}attempts}\PYG{p}{:}
+	                \PYG{n}{individual}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{o}{.}\PYG{n}{day} \PYG{o}{=} \PYG{n}{random}\PYG{o}{.}\PYG{n}{randint}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{l+m+mi}{6}\PYG{p}{)}
+	                \PYG{n}{individual}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{o}{.}\PYG{n}{time\PYGZus{}slot} \PYG{o}{=} \PYG{n}{random}\PYG{o}{.}\PYG{n}{randint}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{l+m+mi}{5}\PYG{p}{)}
+	                \PYG{n}{time\PYGZus{}key} \PYG{o}{=} \PYG{p}{(}\PYG{n}{individual}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{o}{.}\PYG{n}{day}\PYG{p}{,} \PYG{n}{individual}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{o}{.}\PYG{n}{time\PYGZus{}slot}\PYG{p}{)}
+	                \PYG{n}{attempt} \PYG{o}{+=} \PYG{l+m+mi}{1}
+	            \PYG{n}{teacher\PYGZus{}schedule}\PYG{p}{[}\PYG{n}{individual}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{o}{.}\PYG{n}{teacher\PYGZus{}id}\PYG{p}{]}\PYG{o}{.}\PYG{n}{add}\PYG{p}{(}\PYG{n}{time\PYGZus{}key}\PYG{p}{)}
+	
+	            \PYG{c+c1}{\PYGZsh{} 冲突解决：教室时间冲突}
+	            \PYG{n}{classroom\PYGZus{}schedule} \PYG{o}{=} \PYG{p}{\PYGZob{}}\PYG{n}{c}\PYG{p}{:} \PYG{n+nb}{set}\PYG{p}{()} \PYG{k}{for} \PYG{n}{c} \PYG{o+ow}{in} \PYG{n}{classrooms}\PYG{p}{\PYGZcb{}}
+	            \PYG{n}{time\PYGZus{}key} \PYG{o}{=} \PYG{p}{(}\PYG{n}{individual}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{o}{.}\PYG{n}{day}\PYG{p}{,} \PYG{n}{individual}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{o}{.}\PYG{n}{time\PYGZus{}slot}\PYG{p}{)}
+	            \PYG{n}{attempt} \PYG{o}{=} \PYG{l+m+mi}{0}
+	            \PYG{k}{while} \PYG{n}{time\PYGZus{}key} \PYG{o+ow}{in} \PYG{n}{classroom\PYGZus{}schedule}\PYG{p}{[}\PYG{n}{individual}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{o}{.}\PYG{n}{classroom}\PYG{p}{]} \PYGZbs{}
+	                    \PYG{o+ow}{and} \PYG{n}{attempt} \PYG{o}{\PYGZlt{}} \PYG{n}{max\PYGZus{}attempts}\PYG{p}{:}
+	                \PYG{n}{individual}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{o}{.}\PYG{n}{classroom} \PYG{o}{=} \PYG{n}{random}\PYG{o}{.}\PYG{n}{choice}\PYG{p}{(}\PYG{n}{classrooms}\PYG{p}{)}
+	                \PYG{n}{time\PYGZus{}key} \PYG{o}{=} \PYG{p}{(}\PYG{n}{individual}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{o}{.}\PYG{n}{day}\PYG{p}{,} \PYG{n}{individual}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{o}{.}\PYG{n}{time\PYGZus{}slot}\PYG{p}{)}
+	                \PYG{n}{attempt} \PYG{o}{+=} \PYG{l+m+mi}{1}
+	            \PYG{n}{classroom\PYGZus{}schedule}\PYG{p}{[}\PYG{n}{individual}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{o}{.}\PYG{n}{classroom}\PYG{p}{]}\PYG{o}{.}\PYG{n}{add}\PYG{p}{(}\PYG{n}{time\PYGZus{}key}\PYG{p}{)}
+	
+	            \PYG{c+c1}{\PYGZsh{} 冲突解决：班级时间冲突}
+	            \PYG{n}{class\PYGZus{}schedule} \PYG{o}{=} \PYG{p}{\PYGZob{}}\PYG{n+nb+bp}{cls}\PYG{p}{:} \PYG{n+nb}{set}\PYG{p}{()} \PYG{k}{for} \PYG{n+nb+bp}{cls} \PYG{o+ow}{in} \PYG{n}{classes}\PYG{p}{\PYGZcb{}}
+	            \PYG{n}{time\PYGZus{}key} \PYG{o}{=} \PYG{p}{(}\PYG{n}{individual}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{o}{.}\PYG{n}{day}\PYG{p}{,} \PYG{n}{individual}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{o}{.}\PYG{n}{time\PYGZus{}slot}\PYG{p}{)}
+	            \PYG{n}{attempt} \PYG{o}{=} \PYG{l+m+mi}{0}
+	            \PYG{k}{while} \PYG{n}{time\PYGZus{}key} \PYG{o+ow}{in} \PYG{n}{class\PYGZus{}schedule}\PYG{p}{[}\PYG{n}{individual}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{o}{.}\PYG{n}{class\PYGZus{}name}\PYG{p}{]} \PYGZbs{}
+	                    \PYG{o+ow}{and} \PYG{n}{attempt} \PYG{o}{\PYGZlt{}} \PYG{n}{max\PYGZus{}attempts}\PYG{p}{:}
+	                \PYG{n}{individual}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{o}{.}\PYG{n}{day} \PYG{o}{=} \PYG{n}{random}\PYG{o}{.}\PYG{n}{randint}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{l+m+mi}{6}\PYG{p}{)}
+	                \PYG{n}{individual}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{o}{.}\PYG{n}{time\PYGZus{}slot} \PYG{o}{=} \PYG{n}{random}\PYG{o}{.}\PYG{n}{randint}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{l+m+mi}{5}\PYG{p}{)}
+	                \PYG{n}{time\PYGZus{}key} \PYG{o}{=} \PYG{p}{(}\PYG{n}{individual}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{o}{.}\PYG{n}{day}\PYG{p}{,} \PYG{n}{individual}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{o}{.}\PYG{n}{time\PYGZus{}slot}\PYG{p}{)}
+	                \PYG{n}{attempt} \PYG{o}{+=} \PYG{l+m+mi}{1}
+	            \PYG{n}{class\PYGZus{}schedule}\PYG{p}{[}\PYG{n}{individual}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{o}{.}\PYG{n}{class\PYGZus{}name}\PYG{p}{]}\PYG{o}{.}\PYG{n}{add}\PYG{p}{(}\PYG{n}{time\PYGZus{}key}\PYG{p}{)}
+	
+	    \PYG{k}{return} \PYG{n}{individual}
+	
+	\PYG{c+c1}{\PYGZsh{} 遗传算法主循环}
+	\PYG{k}{def} \PYG{n+nf}{genetic\PYGZus{}algorithm}\PYG{p}{():}
+	    \PYG{n}{population} \PYG{o}{=} \PYG{n}{generate\PYGZus{}initial\PYGZus{}population}\PYG{p}{()}
+	    \PYG{n}{fitness\PYGZus{}scores} \PYG{o}{=} \PYG{p}{[}\PYG{n}{calculate\PYGZus{}fitness}\PYG{p}{(}\PYG{n}{ind}\PYG{p}{)} \PYG{k}{for} \PYG{n}{ind} \PYG{o+ow}{in} \PYG{n}{population}\PYG{p}{]}
+	
+	    \PYG{c+c1}{\PYGZsh{} 初始化TensorBoard}
+	    \PYG{n}{writer} \PYG{o}{=} \PYG{n}{SummaryWriter}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}runs/scheduling\PYGZus{}experiment\PYGZsq{}}\PYG{p}{)}
+	
+	    \PYG{c+c1}{\PYGZsh{} 用于保存每100轮的最大适应度值}
+	    \PYG{n}{max\PYGZus{}fitness\PYGZus{}every\PYGZus{}100} \PYG{o}{=} \PYG{p}{[]}
+	
+	    \PYG{c+c1}{\PYGZsh{} 记录过程中最大适应度值及其对应的个体}
+	    \PYG{n}{max\PYGZus{}fitness} \PYG{o}{=} \PYG{n+nb}{max}\PYG{p}{(}\PYG{n}{fitness\PYGZus{}scores}\PYG{p}{)}
+	    \PYG{n}{max\PYGZus{}fitness\PYGZus{}individual} \PYG{o}{=} \PYG{n}{population}\PYG{p}{[}\PYG{n}{np}\PYG{o}{.}\PYG{n}{argmax}\PYG{p}{(}\PYG{n}{fitness\PYGZus{}scores}\PYG{p}{)]}
+	
+	    \PYG{c+c1}{\PYGZsh{} 用于判断适应度值波动是否小于等于0.01}
+	    \PYG{n}{fitness\PYGZus{}history} \PYG{o}{=} \PYG{p}{[}\PYG{n}{max\PYGZus{}fitness}\PYG{p}{]}
+	
+	    \PYG{k}{for} \PYG{n}{generation} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n}{GENERATIONS}\PYG{p}{):}
+	        \PYG{c+c1}{\PYGZsh{} 每100代输出一次进度}
+	        \PYG{k}{if} \PYG{p}{(}\PYG{n}{generation} \PYG{o}{+} \PYG{l+m+mi}{1}\PYG{p}{)} \PYG{o}{\PYGZpc{}} \PYG{l+m+mi}{100} \PYG{o}{==} \PYG{l+m+mi}{0}\PYG{p}{:}
+	            \PYG{n}{best\PYGZus{}index} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{argmax}\PYG{p}{(}\PYG{n}{fitness\PYGZus{}scores}\PYG{p}{)}
+	            \PYG{n+nb}{print}\PYG{p}{(}
+	                \PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}Generation }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{generation}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{, Best Fitness: }\PYG{l+s+se}{\PYGZbs{}}
+\PYG{l+s+s2}{	                }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{fitness\PYGZus{}scores}\PYG{p}{[}\PYG{n}{best\PYGZus{}index}\PYG{p}{]}\PYG{l+s+si}{:}\PYG{l+s+s2}{.4f}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{, Remaining Generations: }\PYG{l+s+se}{\PYGZbs{}}
+\PYG{l+s+s2}{	                }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{GENERATIONS}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{generation}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{p}{)}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{)}
+	            \PYG{n}{max\PYGZus{}fitness\PYGZus{}every\PYGZus{}100}\PYG{o}{.}\PYG{n}{append}\PYG{p}{((}\PYG{n}{generation} \PYG{o}{+} \PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{fitness\PYGZus{}scores}\PYG{p}{[}\PYG{n}{best\PYGZus{}index}\PYG{p}{]))}
+	
+	        \PYG{c+c1}{\PYGZsh{} 记录每一代的最佳适应度值到TensorBoard}
+	        \PYG{n}{current\PYGZus{}best\PYGZus{}fitness} \PYG{o}{=} \PYG{n+nb}{max}\PYG{p}{(}\PYG{n}{fitness\PYGZus{}scores}\PYG{p}{)}
+	        \PYG{n}{writer}\PYG{o}{.}\PYG{n}{add\PYGZus{}scalar}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}Best Fitness\PYGZsq{}}\PYG{p}{,} \PYG{n}{current\PYGZus{}best\PYGZus{}fitness}\PYG{p}{,} \PYG{n}{generation}\PYG{p}{)}
+	
+	        \PYG{c+c1}{\PYGZsh{} 更新过程中最大适应度值及其对应的个体}
+	        \PYG{k}{if} \PYG{n}{current\PYGZus{}best\PYGZus{}fitness} \PYG{o}{\PYGZgt{}} \PYG{n}{max\PYGZus{}fitness}\PYG{p}{:}
+	            \PYG{n}{max\PYGZus{}fitness} \PYG{o}{=} \PYG{n}{current\PYGZus{}best\PYGZus{}fitness}
+	            \PYG{n}{max\PYGZus{}fitness\PYGZus{}individual} \PYG{o}{=} \PYG{n}{population}\PYG{p}{[}\PYG{n}{np}\PYG{o}{.}\PYG{n}{argmax}\PYG{p}{(}\PYG{n}{fitness\PYGZus{}scores}\PYG{p}{)]}
+	
+	        \PYG{c+c1}{\PYGZsh{} 添加到适应度历史记录}
+	        \PYG{n}{fitness\PYGZus{}history}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{n}{current\PYGZus{}best\PYGZus{}fitness}\PYG{p}{)}
+	        \PYG{k}{if} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{fitness\PYGZus{}history}\PYG{p}{)} \PYG{o}{\PYGZgt{}} \PYG{l+m+mi}{10}\PYG{p}{:}  \PYG{c+c1}{\PYGZsh{} 保留最近10代的适应度值}
+	            \PYG{n}{fitness\PYGZus{}history}\PYG{o}{.}\PYG{n}{pop}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{)}
+	
+	        \PYG{c+c1}{\PYGZsh{} 计算适应度值的波动}
+	        \PYG{k}{if} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{fitness\PYGZus{}history}\PYG{p}{)} \PYG{o}{\PYGZgt{}=} \PYG{l+m+mi}{10}\PYG{p}{:}
+	            \PYG{n}{fitness\PYGZus{}std} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{std}\PYG{p}{(}\PYG{n}{fitness\PYGZus{}history}\PYG{p}{)}
+	            \PYG{k}{if} \PYG{n}{fitness\PYGZus{}std} \PYG{o}{\PYGZlt{}=} \PYG{l+m+mf}{0.01}\PYG{p}{:}
+	                \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}Adaptation value fluctuation is less than or equal to 0.01, }\PYG{l+s+se}{\PYGZbs{}}
+\PYG{l+s+s2}{	                stop at generation }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{generation}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{)}
+	                \PYG{k}{break}
+	
+	        \PYG{c+c1}{\PYGZsh{} 精英保留策略：保留前ELITE\PYGZus{}SIZE个优质个体}
+	        \PYG{n}{elite\PYGZus{}indices} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{argsort}\PYG{p}{(}\PYG{n}{fitness\PYGZus{}scores}\PYG{p}{)[}\PYG{o}{\PYGZhy{}}\PYG{n}{ELITE\PYGZus{}SIZE}\PYG{p}{:]}
+	        \PYG{n}{elite\PYGZus{}individuals} \PYG{o}{=} \PYG{p}{[}\PYG{n}{population}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]} \PYG{k}{for} \PYG{n}{i} \PYG{o+ow}{in} \PYG{n}{elite\PYGZus{}indices}\PYG{p}{]}
+	
+	        \PYG{c+c1}{\PYGZsh{} 选择下一代}
+	        \PYG{n}{new\PYGZus{}population} \PYG{o}{=} \PYG{n}{elite\PYGZus{}individuals}\PYG{o}{.}\PYG{n}{copy}\PYG{p}{()}  \PYG{c+c1}{\PYGZsh{} 添加精英个体到新种群}
+	        \PYG{k}{while} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{new\PYGZus{}population}\PYG{p}{)} \PYG{o}{\PYGZlt{}} \PYG{n}{POPULATION\PYGZus{}SIZE}\PYG{p}{:}
+	            \PYG{n}{parent1} \PYG{o}{=} \PYG{n}{select\PYGZus{}parent}\PYG{p}{(}\PYG{n+nb}{list}\PYG{p}{(}\PYG{n+nb}{zip}\PYG{p}{(}\PYG{n}{population}\PYG{p}{,} \PYG{n}{fitness\PYGZus{}scores}\PYG{p}{)))[}\PYG{l+m+mi}{0}\PYG{p}{]}
+	            \PYG{n}{parent2} \PYG{o}{=} \PYG{n}{select\PYGZus{}parent}\PYG{p}{(}\PYG{n+nb}{list}\PYG{p}{(}\PYG{n+nb}{zip}\PYG{p}{(}\PYG{n}{population}\PYG{p}{,} \PYG{n}{fitness\PYGZus{}scores}\PYG{p}{)))[}\PYG{l+m+mi}{0}\PYG{p}{]}
+	            \PYG{n}{child} \PYG{o}{=} \PYG{n}{crossover}\PYG{p}{(}\PYG{n}{parent1}\PYG{p}{,} \PYG{n}{parent2}\PYG{p}{)}
+	            \PYG{n}{child} \PYG{o}{=} \PYG{n}{mutate}\PYG{p}{(}\PYG{n}{child}\PYG{p}{)}
+	            \PYG{n}{new\PYGZus{}population}\PYG{o}{.}\PYG{n}{append}\PYG{p}{(}\PYG{n}{child}\PYG{p}{)}
+	
+	        \PYG{n}{population} \PYG{o}{=} \PYG{n}{new\PYGZus{}population}
+	        \PYG{n}{fitness\PYGZus{}scores} \PYG{o}{=} \PYG{p}{[}\PYG{n}{calculate\PYGZus{}fitness}\PYG{p}{(}\PYG{n}{ind}\PYG{p}{)} \PYG{k}{for} \PYG{n}{ind} \PYG{o+ow}{in} \PYG{n}{population}\PYG{p}{]}
+	
+	        \PYG{c+c1}{\PYGZsh{} 如果达到10000轮次，停止}
+	        \PYG{k}{if} \PYG{n}{generation} \PYG{o}{+} \PYG{l+m+mi}{1} \PYG{o}{\PYGZgt{}=} \PYG{l+m+mi}{10000}\PYG{p}{:}
+	            \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}Reached 10000 generations, stop\PYGZdq{}}\PYG{p}{)}
+	            \PYG{k}{break}
+	
+	    \PYG{c+c1}{\PYGZsh{} 关闭TensorBoard}
+	    \PYG{n}{writer}\PYG{o}{.}\PYG{n}{close}\PYG{p}{()}
+	
+	    \PYG{c+c1}{\PYGZsh{} 将每100轮的最大适应度值保存到文件}
+	    \PYG{k}{with} \PYG{n+nb}{open}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}max\PYGZus{}fitness\PYGZus{}every\PYGZus{}100.txt\PYGZsq{}}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}w\PYGZsq{}}\PYG{p}{)} \PYG{k}{as} \PYG{n}{f}\PYG{p}{:}
+	        \PYG{k}{for} \PYG{n}{gen}\PYG{p}{,} \PYG{n}{fitness} \PYG{o+ow}{in} \PYG{n}{max\PYGZus{}fitness\PYGZus{}every\PYGZus{}100}\PYG{p}{:}
+	            \PYG{n}{f}\PYG{o}{.}\PYG{n}{write}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}Generation }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{gen}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{, Best Fitness: }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{fitness}\PYG{l+s+si}{:}\PYG{l+s+s2}{.4f}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{)}
+	
+	    \PYG{c+c1}{\PYGZsh{} 确保最终答案的适应度不小于过程中最大适应度}
+	    \PYG{n}{final\PYGZus{}best\PYGZus{}index} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{argmax}\PYG{p}{(}\PYG{n}{fitness\PYGZus{}scores}\PYG{p}{)}
+	    \PYG{n}{final\PYGZus{}best\PYGZus{}fitness} \PYG{o}{=} \PYG{n}{fitness\PYGZus{}scores}\PYG{p}{[}\PYG{n}{final\PYGZus{}best\PYGZus{}index}\PYG{p}{]}
+	    \PYG{k}{if} \PYG{n}{final\PYGZus{}best\PYGZus{}fitness} \PYG{o}{\PYGZgt{}=} \PYG{n}{max\PYGZus{}fitness}\PYG{p}{:}
+	        \PYG{n}{best\PYGZus{}individual} \PYG{o}{=} \PYG{n}{population}\PYG{p}{[}\PYG{n}{final\PYGZus{}best\PYGZus{}index}\PYG{p}{]}
+	    \PYG{k}{else}\PYG{p}{:}
+	        \PYG{n}{best\PYGZus{}individual} \PYG{o}{=} \PYG{n}{max\PYGZus{}fitness\PYGZus{}individual}
+	
+	    \PYG{k}{return} \PYG{n}{best\PYGZus{}individual}\PYG{p}{,} \PYG{n}{max\PYGZus{}fitness}\PYG{p}{,} \PYG{n}{max\PYGZus{}fitness\PYGZus{}individual}
+	
+	
+	\PYG{c+c1}{\PYGZsh{} 格式化输出课表}
+	\PYG{k}{def} \PYG{n+nf}{format\PYGZus{}schedule}\PYG{p}{(}\PYG{n}{schedule}\PYG{p}{):}
+	    \PYG{n}{sorted\PYGZus{}schedule} \PYG{o}{=} \PYG{n+nb}{sorted}\PYG{p}{(}\PYG{n}{schedule}\PYG{p}{,} \PYG{n}{key}\PYG{o}{=}\PYG{k}{lambda} \PYG{n}{x}\PYG{p}{:} \PYG{p}{(}\PYG{n}{x}\PYG{o}{.}\PYG{n}{class\PYGZus{}name}\PYG{p}{,} \PYG{n}{x}\PYG{o}{.}\PYG{n}{day}\PYG{p}{,} \PYG{n}{x}\PYG{o}{.}\PYG{n}{time\PYGZus{}slot}\PYG{p}{))}
+	
+	    \PYG{n}{table} \PYG{o}{=} \PYG{n}{PrettyTable}\PYG{p}{()}
+	    \PYG{n}{table}\PYG{o}{.}\PYG{n}{field\PYGZus{}names} \PYG{o}{=} \PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}班级\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}课程\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}教师\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}教室\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}星期\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}时间\PYGZdq{}}\PYG{p}{]}
+	
+	    \PYG{k}{for} \PYG{n}{arr} \PYG{o+ow}{in} \PYG{n}{sorted\PYGZus{}schedule}\PYG{p}{:}
+	        \PYG{n}{time\PYGZus{}str} \PYG{o}{=} \PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{time\PYGZus{}slots}\PYG{p}{[}\PYG{n}{arr}\PYG{o}{.}\PYG{n}{time\PYGZus{}slot}\PYG{p}{][}\PYG{l+s+s1}{\PYGZsq{}start\PYGZsq{}}\PYG{p}{]}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZhy{}}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{time\PYGZus{}slots}\PYG{p}{[}\PYG{n}{arr}\PYG{o}{.}\PYG{n}{time\PYGZus{}slot}\PYG{p}{][}\PYG{l+s+s1}{\PYGZsq{}end\PYGZsq{}}\PYG{p}{]}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}
+	        \PYG{n}{table}\PYG{o}{.}\PYG{n}{add\PYGZus{}row}\PYG{p}{([}\PYG{n}{arr}\PYG{o}{.}\PYG{n}{class\PYGZus{}name}\PYG{p}{,} \PYG{n}{courses}\PYG{p}{[}\PYG{n}{arr}\PYG{o}{.}\PYG{n}{course\PYGZus{}id}\PYG{p}{],}
+	                       \PYG{n}{teachers}\PYG{p}{[}\PYG{n}{arr}\PYG{o}{.}\PYG{n}{teacher\PYGZus{}id}\PYG{p}{][}\PYG{l+s+s1}{\PYGZsq{}name\PYGZsq{}}\PYG{p}{],}
+	                       \PYG{n}{arr}\PYG{o}{.}\PYG{n}{classroom}\PYG{p}{,} \PYG{n}{days}\PYG{p}{[}\PYG{n}{arr}\PYG{o}{.}\PYG{n}{day} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{1}\PYG{p}{],} \PYG{n}{time\PYGZus{}str}\PYG{p}{])}
+	
+	    \PYG{k}{return} \PYG{n}{table}
+	
+	
+	\PYG{c+c1}{\PYGZsh{} 主函数}
+	\PYG{k}{if} \PYG{n+nv+vm}{\PYGZus{}\PYGZus{}name\PYGZus{}\PYGZus{}} \PYG{o}{==} \PYG{l+s+s2}{\PYGZdq{}\PYGZus{}\PYGZus{}main\PYGZus{}\PYGZus{}\PYGZdq{}}\PYG{p}{:}
+	    \PYG{n}{best\PYGZus{}schedule}\PYG{p}{,} \PYG{n}{max\PYGZus{}fitness}\PYG{p}{,} \PYG{n}{max\PYGZus{}fitness\PYGZus{}individual} \PYG{o}{=} \PYG{n}{genetic\PYGZus{}algorithm}\PYG{p}{()}
+	    \PYG{n}{best\PYGZus{}fitness} \PYG{o}{=} \PYG{n}{calculate\PYGZus{}fitness}\PYG{p}{(}\PYG{n}{best\PYGZus{}schedule}\PYG{p}{)}  \PYG{c+c1}{\PYGZsh{} 计算最佳排课方案的适应度值}
+	
+	    \PYG{c+c1}{\PYGZsh{} 确保最终答案的适应度不小于过程中最大适应度}
+	    \PYG{k}{if} \PYG{n}{best\PYGZus{}fitness} \PYG{o}{\PYGZlt{}} \PYG{n}{max\PYGZus{}fitness}\PYG{p}{:}
+	        \PYG{n}{best\PYGZus{}schedule} \PYG{o}{=} \PYG{n}{max\PYGZus{}fitness\PYGZus{}individual}
+	        \PYG{n}{best\PYGZus{}fitness} \PYG{o}{=} \PYG{n}{max\PYGZus{}fitness}
+	
+	    \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{最佳排课方案：\PYGZdq{}}\PYG{p}{)}
+	    \PYG{n}{schedule\PYGZus{}table} \PYG{o}{=} \PYG{n}{format\PYGZus{}schedule}\PYG{p}{(}\PYG{n}{best\PYGZus{}schedule}\PYG{p}{)}
+	    \PYG{n+nb}{print}\PYG{p}{(}\PYG{n}{schedule\PYGZus{}table}\PYG{p}{)}
+	    \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{最佳适应度值：}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{best\PYGZus{}fitness}\PYG{l+s+si}{:}\PYG{l+s+s2}{.4f}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{)}  \PYG{c+c1}{\PYGZsh{} 打印最佳适应度值}
+	
+	    \PYG{c+c1}{\PYGZsh{} 将表格和适应度值保存到文件}
+	    \PYG{k}{with} \PYG{n+nb}{open}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}scheduling\PYGZus{}result.txt\PYGZsq{}}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}w\PYGZsq{}}\PYG{p}{)} \PYG{k}{as} \PYG{n}{f}\PYG{p}{:}
+	        \PYG{n}{f}\PYG{o}{.}\PYG{n}{write}\PYG{p}{(}\PYG{n+nb}{str}\PYG{p}{(}\PYG{n}{schedule\PYGZus{}table}\PYG{p}{))}
+	        \PYG{n}{f}\PYG{o}{.}\PYG{n}{write}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s+s2}{最佳适应度值：}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{best\PYGZus{}fitness}\PYG{l+s+si}{:}\PYG{l+s+s2}{.4f}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{)}
+\end{Verbatim}
